@@ -20,16 +20,16 @@ export function ProjectForm({ project, onSubmit, onCancel, isLoading }: ProjectF
   const [endDate, setEndDate] = useState(
     project?.endDate ? formatDateForInput(project.endDate) : ''
   );
-  const [sow, setSow] = useState(project?.links.sow || '');
+  const [sow, setSow] = useState(project?.links?.sow || '');
   const [usabilityGuidelines, setUsabilityGuidelines] = useState(
-    project?.links.usabilityGuidelines || ''
+    project?.links?.usabilityGuidelines || ''
   );
   const [githubRepository, setGithubRepository] = useState(
-    project?.links.githubRepository || ''
+    project?.links?.githubRepository || ''
   );
-  const [figma, setFigma] = useState(project?.links.figma || '');
+  const [figma, setFigma] = useState(project?.links?.figma || '');
   const [feedbackSpreadsheet, setFeedbackSpreadsheet] = useState(
-    project?.links.feedbackSpreadsheet || ''
+    project?.links?.feedbackSpreadsheet || ''
   );
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -67,7 +67,7 @@ export function ProjectForm({ project, onSubmit, onCancel, isLoading }: ProjectF
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
       <Input
         label="Client Name"
         value={clientName}
