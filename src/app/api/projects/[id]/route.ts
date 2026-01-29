@@ -31,9 +31,10 @@ export async function PUT(
     await connectToDatabase();
     const body = await request.json();
 
+    // Use $set to properly update nested objects like links
     const project = await Project.findByIdAndUpdate(
       params.id,
-      { ...body },
+      { $set: body },
       { new: true }
     );
 

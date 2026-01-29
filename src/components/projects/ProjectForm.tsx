@@ -50,24 +50,26 @@ export function ProjectForm({ project, onSubmit, onCancel, isLoading }: ProjectF
 
     if (!validate()) return;
 
+    // Build links object with only non-empty values
+    const links: Record<string, string> = {};
+    if (sow.trim()) links.sow = sow.trim();
+    if (usabilityGuidelines.trim()) links.usabilityGuidelines = usabilityGuidelines.trim();
+    if (githubRepository.trim()) links.githubRepository = githubRepository.trim();
+    if (figma.trim()) links.figma = figma.trim();
+    if (feedbackSpreadsheet.trim()) links.feedbackSpreadsheet = feedbackSpreadsheet.trim();
+
     await onSubmit({
       clientName: clientName.trim(),
       description: description.trim(),
       status,
       endDate: endDate || undefined,
-      links: {
-        sow: sow.trim() || undefined,
-        usabilityGuidelines: usabilityGuidelines.trim() || undefined,
-        githubRepository: githubRepository.trim() || undefined,
-        figma: figma.trim() || undefined,
-        feedbackSpreadsheet: feedbackSpreadsheet.trim() || undefined,
-      },
+      links,
       completedAt: project?.completedAt,
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <Input
         label="Client Name"
         value={clientName}

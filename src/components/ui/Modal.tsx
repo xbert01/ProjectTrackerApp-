@@ -57,10 +57,11 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
           bg-white dark:bg-gray-800
           rounded-lg shadow-xl
           transform transition-all
+          max-h-[90vh] flex flex-col
         `}
       >
         {title && (
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               {title}
             </h2>
@@ -74,7 +75,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
             </button>
           </div>
         )}
-        <div className="p-4">{children}</div>
+        <div className="p-4 overflow-y-auto">{children}</div>
       </div>
     </div>
   );
