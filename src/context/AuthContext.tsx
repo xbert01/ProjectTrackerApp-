@@ -1,21 +1,17 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User } from '@/types';
-import { storage, generateId } from '@/lib/storage';
+import { createContext, useContext, ReactNode } from 'react';
+import { useSession } from 'next-auth/react';
 
-// Mock user for testing (auth disabled)
-const MOCK_USER: User = {
-  id: 'test-user-1',
-  email: 'test@example.com',
-  name: 'Test User',
-  image: undefined,
-  isManager: true,
-  createdAt: new Date().toISOString(),
-};
+interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  isManager: boolean;
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   isLoading: boolean;
   isManager: boolean;
 }
@@ -27,27 +23,24 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: session, status } = useSession();
+  const isLoading = status === 'loading';
 
-  useEffect(() => {
-    async function initUser() {
-      // Store mock user in localStorage
-      const existingUser = await storage.users.getByEmail(MOCK_USER.email);
-      if (!existingUser) {
-        await storage.users.create(MOCK_USER);
+  const user: AuthUser | null = session?.user
+    ? {
+        id: session.user.id,
+        email: session.user.email || '',
+        name: session.user.name || '',
+        isManager: session.user.isManager || false,
       }
-      setIsLoading(false);
-    }
-
-    initUser();
-  }, []);
+    : null;
 
   return (
     <AuthContext.Provider
       value={{
-        user: MOCK_USER,
+        user,
         isLoading,
-        isManager: MOCK_USER.isManager,
+        isManager: user?.isManager || false,
       }}
     >
       {children}

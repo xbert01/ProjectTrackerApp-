@@ -1,5 +1,8 @@
 import { NextAuthOptions } from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import bcrypt from 'bcryptjs';
+import connectToDatabase from '@/lib/db/mongoose';
+import { User } from '@/lib/db/models';
 
 declare module 'next-auth' {
   interface Session {
@@ -7,7 +10,6 @@ declare module 'next-auth' {
       id: string;
       email: string;
       name: string;
-      image?: string;
       isManager: boolean;
     };
   }
@@ -24,26 +26,50 @@ declare module 'next-auth/jwt' {
   }
 }
 
-function isManager(email: string): boolean {
-  const managerEmails = process.env.MANAGER_EMAILS?.split(',').map((e) => e.trim()) || [];
-  return managerEmails.includes(email);
-}
-
 export const authOptions: NextAuthOptions = {
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    CredentialsProvider({
+      name: 'credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Email and password are required');
+        }
+
+        await connectToDatabase();
+
+        const user = await User.findOne({ email: credentials.email.toLowerCase() });
+
+        if (!user) {
+          throw new Error('Invalid email or password');
+        }
+
+        const isValidPassword = await bcrypt.compare(credentials.password, user.password);
+
+        if (!isValidPassword) {
+          throw new Error('Invalid email or password');
+        }
+
+        return {
+          id: user._id.toString(),
+          email: user.email,
+          name: user.name,
+          isManager: user.isManager,
+        };
+      },
     }),
   ],
-  pages: {
-    signIn: '/login',
+  session: {
+    strategy: 'jwt',
   },
   callbacks: {
-    async jwt({ token, user, account }) {
-      if (account && user) {
-        token.id = user.id || token.sub || '';
-        token.isManager = isManager(user.email || '');
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id as string;
+        token.isManager = (user as any).isManager || false;
       }
       return token;
     },
@@ -55,7 +81,8 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  session: {
-    strategy: 'jwt',
+  pages: {
+    signIn: '/login',
   },
+  secret: process.env.NEXTAUTH_SECRET,
 };
