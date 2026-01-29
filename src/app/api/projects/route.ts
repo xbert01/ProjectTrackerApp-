@@ -1,12 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db/mongoose';
 import { Project } from '@/lib/db/models';
+import { getCurrentUserId, isCurrentUserManager } from '@/lib/auth-utils';
 
-// GET all projects
+// GET all projects (filtered by user)
 export async function GET() {
   try {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     await connectToDatabase();
-    const projects = await Project.find({}).sort({ createdAt: -1 });
+
+    // Managers see all projects, regular users see only their own
+    const isManager = await isCurrentUserManager();
+    const query = isManager ? {} : { ownerId: userId };
+
+    const projects = await Project.find(query).sort({ createdAt: -1 });
     return NextResponse.json(projects.map(p => p.toJSON()));
   } catch (error) {
     console.error('Error fetching projects:', error);
@@ -17,12 +28,17 @@ export async function GET() {
 // POST create new project
 export async function POST(request: NextRequest) {
   try {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     await connectToDatabase();
     const body = await request.json();
 
     const project = new Project({
       ...body,
-      ownerId: body.ownerId || 'mock-user-id',
+      ownerId: userId,
       createdAt: new Date().toISOString(),
     });
 
