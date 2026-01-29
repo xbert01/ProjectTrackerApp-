@@ -75,17 +75,9 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
-            {user?.image ? (
-              <img
-                src={user.image}
-                alt={user.name}
-                className="w-16 h-16 rounded-full"
-              />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-primary-600 flex items-center justify-center text-white text-xl font-medium">
-                {user?.name?.charAt(0) || '?'}
-              </div>
-            )}
+            <div className="w-16 h-16 rounded-full bg-primary-600 flex items-center justify-center text-white text-xl font-medium">
+              {user?.name?.charAt(0) || '?'}
+            </div>
             <div>
               <p className="text-lg font-medium text-gray-900 dark:text-white">
                 {user?.name}
