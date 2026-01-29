@@ -87,17 +87,9 @@ export function Header({ onMenuClick }: HeaderProps) {
           align="right"
           trigger={
             <button className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-              {user?.image ? (
-                <img
-                  src={user.image}
-                  alt={user.name || ''}
-                  className="w-8 h-8 rounded-full"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-sm font-medium">
-                  {user?.name?.charAt(0) || '?'}
-                </div>
-              )}
+              <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-sm font-medium">
+                {user?.name?.charAt(0) || '?'}
+              </div>
             </button>
           }
         >

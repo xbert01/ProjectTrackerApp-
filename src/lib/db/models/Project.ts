@@ -1,7 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IProject extends Document {
-  _id: string;
   ownerId: string;
   clientName: string;
   description: string;
@@ -43,7 +42,7 @@ const ProjectSchema = new Schema<IProject>(
     timestamps: false,
     toJSON: {
       virtuals: true,
-      transform: (_, ret) => {
+      transform: (_, ret: any) => {
         ret.id = ret._id.toString();
         delete ret._id;
         delete ret.__v;

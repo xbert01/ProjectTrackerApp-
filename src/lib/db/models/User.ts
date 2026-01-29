@@ -1,7 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IUser extends Document {
-  _id: string;
   email: string;
   name: string;
   password: string;
@@ -21,7 +20,7 @@ const UserSchema = new Schema<IUser>(
     timestamps: false,
     toJSON: {
       virtuals: true,
-      transform: (_, ret) => {
+      transform: (_, ret: any) => {
         ret.id = ret._id.toString();
         delete ret._id;
         delete ret.__v;

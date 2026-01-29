@@ -1,7 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IReminder extends Document {
-  _id: string;
   projectId?: string;
   taskId?: string;
   message: string;
@@ -23,7 +22,7 @@ const ReminderSchema = new Schema<IReminder>(
     timestamps: false,
     toJSON: {
       virtuals: true,
-      transform: (_, ret) => {
+      transform: (_, ret: any) => {
         ret.id = ret._id.toString();
         delete ret._id;
         delete ret.__v;

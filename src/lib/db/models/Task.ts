@@ -1,7 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface ITask extends Document {
-  _id: string;
   projectId: string;
   title: string;
   status: 'todo' | 'in_progress' | 'done';
@@ -25,7 +24,7 @@ const TaskSchema = new Schema<ITask>(
     timestamps: false,
     toJSON: {
       virtuals: true,
-      transform: (_, ret) => {
+      transform: (_, ret: any) => {
         ret.id = ret._id.toString();
         delete ret._id;
         delete ret.__v;
