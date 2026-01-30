@@ -8,10 +8,13 @@ interface TaskDraggableProps {
   task: Task;
   project?: Project;
   onToggle: (id: string) => void;
+  onEdit?: (task: Task) => void;
 }
 
 // Generate a color based on project id for the ribbon
-const getProjectColor = (projectId: string) => {
+const getProjectColor = (projectId?: string) => {
+  if (!projectId) return 'bg-gray-400';  // General tasks
+
   const colors = [
     'bg-blue-500',
     'bg-green-500',
@@ -29,7 +32,7 @@ const getProjectColor = (projectId: string) => {
   return colors[Math.abs(hash) % colors.length];
 };
 
-export function TaskDraggable({ task, project, onToggle }: TaskDraggableProps) {
+export function TaskDraggable({ task, project, onToggle, onEdit }: TaskDraggableProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
     data: task,
@@ -58,7 +61,7 @@ export function TaskDraggable({ task, project, onToggle }: TaskDraggableProps) {
       {...listeners}
       {...attributes}
       className={`
-        relative flex items-center gap-2 p-2 pl-3 text-xs rounded overflow-hidden
+        relative flex items-center gap-2 p-2 pl-3 text-xs rounded overflow-hidden group
         ${task.status === 'done'
           ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
           : isOverdue
@@ -105,12 +108,32 @@ export function TaskDraggable({ task, project, onToggle }: TaskDraggableProps) {
         <span className={`truncate block ${task.status === 'done' ? 'line-through' : ''}`}>
           {task.title}
         </span>
-        {project && (
+        {project ? (
           <span className="text-[10px] opacity-60 truncate block">
             {project.clientName}
           </span>
+        ) : !task.projectId && (
+          <span className="text-[10px] opacity-60 truncate block italic">
+            General
+          </span>
         )}
       </div>
+
+      {/* Edit button */}
+      {onEdit && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(task);
+          }}
+          className="flex-shrink-0 p-0.5 opacity-0 group-hover:opacity-100 hover:text-primary-600 dark:hover:text-primary-400 transition-opacity"
+          title="Edit task"
+        >
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        </button>
+      )}
 
       {/* Due date warning indicator */}
       {(isOverdue || isApproaching) && (

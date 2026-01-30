@@ -9,7 +9,7 @@ interface TaskListProps {
   onDelete: (id: string) => void;
   canEdit?: boolean;
   showProject?: boolean;
-  getProjectName?: (projectId: string) => string | undefined;
+  getProjectName?: (projectId?: string) => string | undefined;
 }
 
 export function TaskList({

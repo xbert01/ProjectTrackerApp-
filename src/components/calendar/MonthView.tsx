@@ -12,9 +12,10 @@ interface DayCellProps {
   projects: Project[];
   onToggleTask: (id: string) => void;
   onAddTask?: (date: string) => void;
+  onEditTask?: (task: Task) => void;
 }
 
-function DayCell({ date, currentMonth, tasks, projects, onToggleTask, onAddTask }: DayCellProps) {
+function DayCell({ date, currentMonth, tasks, projects, onToggleTask, onAddTask, onEditTask }: DayCellProps) {
   const dateStr = formatDateForInput(date);
   const { setNodeRef, isOver } = useDroppable({
     id: dateStr,
@@ -23,8 +24,8 @@ function DayCell({ date, currentMonth, tasks, projects, onToggleTask, onAddTask 
   const dayTasks = tasks.filter((t) => t.calendarDate === dateStr);
   const isCurrentMonth = date.getMonth() === currentMonth;
 
-  const getProject = (projectId: string) => {
-    return projects.find((p) => p.id === projectId);
+  const getProject = (projectId?: string) => {
+    return projectId ? projects.find((p) => p.id === projectId) : undefined;
   };
 
   return (
@@ -72,6 +73,7 @@ function DayCell({ date, currentMonth, tasks, projects, onToggleTask, onAddTask 
             task={task}
             project={getProject(task.projectId)}
             onToggle={onToggleTask}
+            onEdit={onEditTask}
           />
         ))}
         {dayTasks.length > 3 && (
@@ -91,9 +93,10 @@ interface MonthViewProps {
   projects: Project[];
   onToggleTask: (id: string) => void;
   onAddTask?: (date: string) => void;
+  onEditTask?: (task: Task) => void;
 }
 
-export function MonthView({ dates, currentDate, tasks, projects, onToggleTask, onAddTask }: MonthViewProps) {
+export function MonthView({ dates, currentDate, tasks, projects, onToggleTask, onAddTask, onEditTask }: MonthViewProps) {
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
@@ -121,6 +124,7 @@ export function MonthView({ dates, currentDate, tasks, projects, onToggleTask, o
             projects={projects}
             onToggleTask={onToggleTask}
             onAddTask={onAddTask}
+            onEditTask={onEditTask}
           />
         ))}
       </div>

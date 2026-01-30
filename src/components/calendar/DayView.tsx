@@ -11,9 +11,10 @@ interface DayViewProps {
   projects: Project[];
   onToggleTask: (id: string) => void;
   onAddTask?: (date: string) => void;
+  onEditTask?: (task: Task) => void;
 }
 
-export function DayView({ date, tasks, projects, onToggleTask, onAddTask }: DayViewProps) {
+export function DayView({ date, tasks, projects, onToggleTask, onAddTask, onEditTask }: DayViewProps) {
   const dateStr = formatDateForInput(date);
   const { setNodeRef, isOver } = useDroppable({
     id: dateStr,
@@ -21,8 +22,8 @@ export function DayView({ date, tasks, projects, onToggleTask, onAddTask }: DayV
 
   const dayTasks = tasks.filter((t) => t.calendarDate === dateStr);
 
-  const getProject = (projectId: string) => {
-    return projects.find((p) => p.id === projectId);
+  const getProject = (projectId?: string) => {
+    return projectId ? projects.find((p) => p.id === projectId) : undefined;
   };
 
   return (
@@ -80,6 +81,7 @@ export function DayView({ date, tasks, projects, onToggleTask, onAddTask }: DayV
               task={task}
               project={getProject(task.projectId)}
               onToggle={onToggleTask}
+              onEdit={onEditTask}
             />
           ))
         )}

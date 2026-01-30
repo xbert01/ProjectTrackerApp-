@@ -12,7 +12,8 @@ export function useSearch() {
 
   const tasks = useMemo(() => {
     const projectIds = new Set(projects.map((p) => p.id));
-    return state.tasks.filter((t) => projectIds.has(t.projectId));
+    // Include tasks from user's projects and general tasks (no projectId)
+    return state.tasks.filter((t) => !t.projectId || projectIds.has(t.projectId));
   }, [state.tasks, projects]);
 
   const notes = useMemo(() => {

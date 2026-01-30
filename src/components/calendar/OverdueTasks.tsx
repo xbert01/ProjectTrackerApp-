@@ -11,7 +11,8 @@ interface OverdueTasksProps {
 }
 
 export function OverdueTasks({ tasks, projects, onToggle, onMoveToToday }: OverdueTasksProps) {
-  const getProjectName = (projectId: string) => {
+  const getProjectName = (projectId?: string) => {
+    if (!projectId) return 'General';
     const project = projects.find((p) => p.id === projectId);
     return project?.clientName || 'Unknown Project';
   };

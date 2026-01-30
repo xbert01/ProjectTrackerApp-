@@ -3,7 +3,7 @@ import connectToDatabase from '@/lib/db/mongoose';
 import { Task, Project } from '@/lib/db/models';
 import { getCurrentUserId, isCurrentUserManager } from '@/lib/auth-utils';
 
-// GET all tasks (filtered by user's projects)
+// GET all tasks (filtered by user's projects + user's general tasks)
 export async function GET(request: NextRequest) {
   try {
     const userId = await getCurrentUserId();
@@ -16,16 +16,38 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get('projectId');
 
-    // Get user's project IDs
     const isManager = await isCurrentUserManager();
-    const projectQuery = isManager ? {} : { ownerId: userId };
-    const userProjects = await Project.find(projectQuery).select('_id');
+
+    if (isManager) {
+      // Managers see all tasks
+      const query = projectId ? { projectId } : {};
+      const tasks = await Task.find(query).sort({ createdAt: -1 });
+      return NextResponse.json(tasks.map(t => t.toJSON()));
+    }
+
+    // Get user's project IDs
+    const userProjects = await Project.find({ ownerId: userId }).select('_id');
     const userProjectIds = userProjects.map(p => p._id.toString());
 
-    // Filter tasks by user's projects
-    let query: any = { projectId: { $in: userProjectIds } };
-    if (projectId && userProjectIds.includes(projectId)) {
-      query = { projectId };
+    // Filter: user's project tasks OR user's general tasks (no projectId)
+    let query: any;
+    if (projectId) {
+      // Specific project requested
+      if (userProjectIds.includes(projectId)) {
+        query = { projectId };
+      } else {
+        return NextResponse.json([]);
+      }
+    } else {
+      // All tasks: from user's projects OR owned by user (general tasks)
+      query = {
+        $or: [
+          { projectId: { $in: userProjectIds } },
+          { ownerId: userId, projectId: { $exists: false } },
+          { ownerId: userId, projectId: null },
+          { ownerId: userId, projectId: '' }
+        ]
+      };
     }
 
     const tasks = await Task.find(query).sort({ createdAt: -1 });
@@ -47,15 +69,19 @@ export async function POST(request: NextRequest) {
     await connectToDatabase();
     const body = await request.json();
 
-    // Verify user owns the project
-    const isManager = await isCurrentUserManager();
-    const project = await Project.findById(body.projectId);
-    if (!project || (!isManager && project.ownerId !== userId)) {
-      return NextResponse.json({ error: 'Project not found or access denied' }, { status: 403 });
+    // If projectId provided, verify user owns the project
+    if (body.projectId) {
+      const isManager = await isCurrentUserManager();
+      const project = await Project.findById(body.projectId);
+      if (!project || (!isManager && project.ownerId !== userId)) {
+        return NextResponse.json({ error: 'Project not found or access denied' }, { status: 403 });
+      }
     }
 
     const task = new Task({
       ...body,
+      ownerId: userId,
+      projectId: body.projectId || undefined,
       status: body.status || 'todo',
       createdAt: new Date().toISOString(),
     });

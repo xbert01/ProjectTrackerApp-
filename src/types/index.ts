@@ -33,7 +33,7 @@ export type TaskStatus = 'todo' | 'in_progress' | 'done';
 // Task
 export interface Task {
   id: string;
-  projectId: string;
+  projectId?: string;  // Optional - allows general/admin tasks
   title: string;
   status: TaskStatus;
   calendarDate: string;

@@ -10,6 +10,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { formatDateForInput } from '@/lib/utils/date';
+import { Task } from '@/types';
 
 type TabType = 'calendar' | 'overdue';
 
@@ -21,8 +22,16 @@ export default function CalendarPage() {
   const [newTaskProjectId, setNewTaskProjectId] = useState('');
   const [isAddingTask, setIsAddingTask] = useState(false);
 
+  // Edit task state
+  const [isEditTaskModalOpen, setIsEditTaskModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [editTaskTitle, setEditTaskTitle] = useState('');
+  const [editTaskProjectId, setEditTaskProjectId] = useState('');
+  const [editTaskDate, setEditTaskDate] = useState('');
+  const [isEditingTask, setIsEditingTask] = useState(false);
+
   const { projects } = useProjects();
-  const { toggleTaskStatus, moveTaskToDate, createTask } = useTasks();
+  const { toggleTaskStatus, moveTaskToDate, createTask, updateTask } = useTasks();
   const {
     view,
     setView,
@@ -46,18 +55,18 @@ export default function CalendarPage() {
   const handleAddTask = (date: string) => {
     setSelectedDate(date);
     setNewTaskTitle('');
-    setNewTaskProjectId(projects[0]?.id || '');
+    setNewTaskProjectId(''); // Empty = general task
     setIsAddTaskModalOpen(true);
   };
 
   const handleSubmitNewTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTaskTitle.trim() || !newTaskProjectId) return;
+    if (!newTaskTitle.trim()) return;
 
     setIsAddingTask(true);
     try {
       await createTask({
-        projectId: newTaskProjectId,
+        projectId: newTaskProjectId || undefined, // undefined for general tasks
         title: newTaskTitle.trim(),
         calendarDate: selectedDate,
         status: 'todo',
@@ -65,6 +74,32 @@ export default function CalendarPage() {
       setIsAddTaskModalOpen(false);
     } finally {
       setIsAddingTask(false);
+    }
+  };
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setEditTaskTitle(task.title);
+    setEditTaskProjectId(task.projectId || '');
+    setEditTaskDate(task.calendarDate);
+    setIsEditTaskModalOpen(true);
+  };
+
+  const handleSubmitEditTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTask || !editTaskTitle.trim()) return;
+
+    setIsEditingTask(true);
+    try {
+      await updateTask(editingTask.id, {
+        title: editTaskTitle.trim(),
+        projectId: editTaskProjectId || undefined,
+        calendarDate: editTaskDate,
+      });
+      setIsEditTaskModalOpen(false);
+      setEditingTask(null);
+    } finally {
+      setIsEditingTask(false);
     }
   };
 
@@ -120,6 +155,7 @@ export default function CalendarPage() {
           onGoToPrevious={goToPrevious}
           onGoToNext={goToNext}
           onAddTask={handleAddTask}
+          onEditTask={handleEditTask}
         />
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
@@ -157,6 +193,7 @@ export default function CalendarPage() {
               onChange={(e) => setNewTaskProjectId(e.target.value)}
               className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
+              <option value="">General (No Project)</option>
               {projects.map((project) => (
                 <option key={project.id} value={project.id}>
                   {project.clientName}
@@ -175,6 +212,68 @@ export default function CalendarPage() {
             </Button>
             <Button type="submit" isLoading={isAddingTask}>
               Add Task
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Edit Task Modal */}
+      <Modal
+        isOpen={isEditTaskModalOpen}
+        onClose={() => {
+          setIsEditTaskModalOpen(false);
+          setEditingTask(null);
+        }}
+        title="Edit Task"
+        size="sm"
+      >
+        <form onSubmit={handleSubmitEditTask} className="space-y-4">
+          <Input
+            label="Task Title"
+            value={editTaskTitle}
+            onChange={(e) => setEditTaskTitle(e.target.value)}
+            placeholder="Enter task title"
+            autoFocus
+          />
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Project
+            </label>
+            <select
+              value={editTaskProjectId}
+              onChange={(e) => setEditTaskProjectId(e.target.value)}
+              className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            >
+              <option value="">General (No Project)</option>
+              {projects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.clientName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <Input
+            label="Date"
+            type="date"
+            value={editTaskDate}
+            onChange={(e) => setEditTaskDate(e.target.value)}
+          />
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setIsEditTaskModalOpen(false);
+                setEditingTask(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" isLoading={isEditingTask}>
+              Save Changes
             </Button>
           </div>
         </form>

@@ -33,7 +33,9 @@ export function KanbanCard({ task, project, onDelete }: KanbanCardProps) {
   })();
 
   // Generate a color based on project id for the ribbon
-  const getProjectColor = (projectId: string) => {
+  const getProjectColor = (projectId?: string) => {
+    if (!projectId) return 'bg-gray-400'; // General tasks
+
     const colors = [
       'bg-blue-500',
       'bg-green-500',
@@ -79,9 +81,13 @@ export function KanbanCard({ task, project, onDelete }: KanbanCardProps) {
 
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center gap-2">
-            {project && (
+            {project ? (
               <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[100px]">
                 {project.clientName}
+              </span>
+            ) : !task.projectId && (
+              <span className="text-xs text-gray-400 dark:text-gray-500 italic">
+                General
               </span>
             )}
           </div>

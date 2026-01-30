@@ -11,9 +11,10 @@ interface DayColumnProps {
   projects: Project[];
   onToggleTask: (id: string) => void;
   onAddTask?: (date: string) => void;
+  onEditTask?: (task: Task) => void;
 }
 
-function DayColumn({ date, tasks, projects, onToggleTask, onAddTask }: DayColumnProps) {
+function DayColumn({ date, tasks, projects, onToggleTask, onAddTask, onEditTask }: DayColumnProps) {
   const dateStr = formatDateForInput(date);
   const { setNodeRef, isOver } = useDroppable({
     id: dateStr,
@@ -21,8 +22,8 @@ function DayColumn({ date, tasks, projects, onToggleTask, onAddTask }: DayColumn
 
   const dayTasks = tasks.filter((t) => t.calendarDate === dateStr);
 
-  const getProject = (projectId: string) => {
-    return projects.find((p) => p.id === projectId);
+  const getProject = (projectId?: string) => {
+    return projectId ? projects.find((p) => p.id === projectId) : undefined;
   };
 
   return (
@@ -70,6 +71,7 @@ function DayColumn({ date, tasks, projects, onToggleTask, onAddTask }: DayColumn
             task={task}
             project={getProject(task.projectId)}
             onToggle={onToggleTask}
+            onEdit={onEditTask}
           />
         ))}
       </div>
@@ -83,9 +85,10 @@ interface WeekViewProps {
   projects: Project[];
   onToggleTask: (id: string) => void;
   onAddTask?: (date: string) => void;
+  onEditTask?: (task: Task) => void;
 }
 
-export function WeekView({ dates, tasks, projects, onToggleTask, onAddTask }: WeekViewProps) {
+export function WeekView({ dates, tasks, projects, onToggleTask, onAddTask, onEditTask }: WeekViewProps) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
       <div className="flex">
@@ -97,6 +100,7 @@ export function WeekView({ dates, tasks, projects, onToggleTask, onAddTask }: We
             projects={projects}
             onToggleTask={onToggleTask}
             onAddTask={onAddTask}
+            onEditTask={onEditTask}
           />
         ))}
       </div>

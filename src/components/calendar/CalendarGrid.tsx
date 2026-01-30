@@ -1,6 +1,6 @@
 'use client';
 
-import { DndContext, DragEndEvent, DragOverlay, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import { CalendarView, Task, Project } from '@/types';
 import { DayView } from './DayView';
 import { WeekView } from './WeekView';
@@ -20,6 +20,7 @@ interface CalendarGridProps {
   onGoToPrevious: () => void;
   onGoToNext: () => void;
   onAddTask?: (date: string) => void;
+  onEditTask?: (task: Task) => void;
 }
 
 export function CalendarGrid({
@@ -35,6 +36,7 @@ export function CalendarGrid({
   onGoToPrevious,
   onGoToNext,
   onAddTask,
+  onEditTask,
 }: CalendarGridProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -133,6 +135,7 @@ export function CalendarGrid({
             projects={projects}
             onToggleTask={onToggleTask}
             onAddTask={onAddTask}
+            onEditTask={onEditTask}
           />
         )}
         {view === 'week' && (
@@ -142,6 +145,7 @@ export function CalendarGrid({
             projects={projects}
             onToggleTask={onToggleTask}
             onAddTask={onAddTask}
+            onEditTask={onEditTask}
           />
         )}
         {view === 'month' && (
@@ -152,6 +156,7 @@ export function CalendarGrid({
             projects={projects}
             onToggleTask={onToggleTask}
             onAddTask={onAddTask}
+            onEditTask={onEditTask}
           />
         )}
       </DndContext>

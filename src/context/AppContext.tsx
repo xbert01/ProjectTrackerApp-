@@ -98,7 +98,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         projects: state.projects.filter((p) => !action.payload.projectIds.includes(p.id)),
-        tasks: state.tasks.filter((t) => !action.payload.projectIds.includes(t.projectId)),
+        tasks: state.tasks.filter((t) => !t.projectId || !action.payload.projectIds.includes(t.projectId)),
         notes: state.notes.filter((n) => !action.payload.projectIds.includes(n.projectId)),
       };
 

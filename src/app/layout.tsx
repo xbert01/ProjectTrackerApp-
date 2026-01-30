@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Project Tracker',
   description: 'Manage your projects and tasks efficiently',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

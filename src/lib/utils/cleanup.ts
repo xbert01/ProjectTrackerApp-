@@ -28,7 +28,7 @@ export function cleanupOldProjects(
   }
 
   const filteredProjects = projects.filter((p) => !removedProjectIds.includes(p.id));
-  const filteredTasks = tasks.filter((t) => !removedProjectIds.includes(t.projectId));
+  const filteredTasks = tasks.filter((t) => !t.projectId || !removedProjectIds.includes(t.projectId));
   const filteredNotes = notes.filter((n) => !removedProjectIds.includes(n.projectId));
   const filteredReminders = reminders.filter(
     (r) => !r.projectId || !removedProjectIds.includes(r.projectId)

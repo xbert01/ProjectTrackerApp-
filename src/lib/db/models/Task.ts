@@ -1,7 +1,8 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface ITask extends Document {
-  projectId: string;
+  projectId?: string;
+  ownerId: string;  // For tasks without project
   title: string;
   status: 'todo' | 'in_progress' | 'done';
   calendarDate: string;
@@ -10,7 +11,8 @@ export interface ITask extends Document {
 
 const TaskSchema = new Schema<ITask>(
   {
-    projectId: { type: String, required: true, index: true },
+    projectId: { type: String, index: true },  // Optional for general tasks
+    ownerId: { type: String, required: true, index: true },
     title: { type: String, required: true },
     status: {
       type: String,

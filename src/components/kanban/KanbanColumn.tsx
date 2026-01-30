@@ -18,8 +18,8 @@ export function KanbanColumn({ id, title, tasks, projects, onDeleteTask }: Kanba
     data: { status: id },
   });
 
-  const getProject = (projectId: string) => {
-    return projects.find((p) => p.id === projectId);
+  const getProject = (projectId?: string) => {
+    return projectId ? projects.find((p) => p.id === projectId) : undefined;
   };
 
   const columnColors = {
